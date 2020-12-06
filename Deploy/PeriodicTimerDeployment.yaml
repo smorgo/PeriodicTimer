@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: periodic-minute-timer
+  namespace: energy-services
+  labels:
+    app: periodic-minute-timer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: periodic-minute-timer
+  template:
+    metadata:
+      labels:
+        app: periodic-minute-timer
+    spec:
+      containers:
+        - name: periodic-minute-timer
+          env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: MQTT_BROKER
+            valueFrom:
+              configMapKeyRef:
+                name: periodic-minute-timer-configmap
+                key: mqtt_broker
+          - name: MQTT_TOPIC
+            valueFrom:
+              configMapKeyRef:
+                name: periodic-minute-timer-configmap
+                key: mqtt_topic
+          - name: TIMER_INTERVAL
+            valueFrom:
+              configMapKeyRef:
+                name: periodic-minute-timer-configmap
+                key: timer_interval
+          - name: MESSAGE_LABEL
+            valueFrom:
+              configMapKeyRef:
+                name: periodic-minute-timer-configmap
+                key: message_label
+          image: smorgo/periodictimer:latest
+          resources:
+            limits:
+              memory: "24Mi"
+              cpu: "100m"
+            requests:
+              memory: "12Mi"
+              cpu: "16m"
+    
